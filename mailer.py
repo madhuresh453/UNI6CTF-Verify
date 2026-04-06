@@ -1,153 +1,128 @@
+
 import pandas as pd
 import smtplib
 import ssl
 from email.message import EmailMessage
 import time
-from concurrent.futures import ThreadPoolExecutor
-from config import *
-
-from config import EMAIL, PASSWORD, SMTP_SERVER, SMTP_PORT
 import os
 
-if not os.path.exists("output/final_data.csv") or os.path.getsize("output/final_data.csv") == 0:
+from config import EMAIL, PASSWORD, SMTP_SERVER, SMTP_PORT, BASE_URL, LOGO_URL, CERT_BASE_URL, TRACK_URL
+
+# ===============================
+# 📂 LOAD DATA
+# ===============================
+csv_path = "output/final_data.csv"
+
+if not os.path.exists(csv_path) or os.path.getsize(csv_path) == 0:
     print("❌ No data found. Run generator first.")
     exit()
 
-df = pd.read_csv("output/final_data.csv")
+df = pd.read_csv(csv_path)
 
-# 🔥 FIX COLUMN NAMES
+# 🔥 CLEAN COLUMN NAMES
 df.columns = df.columns.str.strip()
+print("Columns:", df.columns.tolist())
 
-print("Columns after fix:", df.columns.tolist())
+# ===============================
+# 🧹 CLEAN DATA
+# ===============================
+df = df[df['Email'].notna()]
+df = df[df['File'].notna()]
+df = df.drop_duplicates(subset=['Email'], keep='last')
 
-# ✅ KEEP ONLY LATEST UNIQUE CERTIFICATES
-if 'Certificate ID' in df.columns:
-    df = df.drop_duplicates(subset=['Certificate ID'], keep='last')
-else:
-    print("❌ Column 'Certificate ID' not found")
-    print("Available columns:", df.columns.tolist())
-    exit()
+print("📊 Total emails to send:", len(df))
 
-# ✅ OPTIONAL: ONLY LAST BATCH (BEST)
-df = df.tail(3)   # since your current file has 3 users
-
-print("📊 Total unique emails:", len(df))
-
+# ===============================
+# 🔐 SMTP SETUP
+# ===============================
 context = ssl.create_default_context()
 
-with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-    server.starttls(context=context)
-    server.login(EMAIL, PASSWORD)
+try:
+    with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+        server.starttls(context=context)
+        server.login(EMAIL, PASSWORD)
 
-    for i, row in df.iterrows():
-        try:
-            email = row.get('Email')
+        # ===============================
+        # 📧 SEND EMAIL LOOP
+        # ===============================
+        for _, row in df.iterrows():
 
-            if pd.isna(email):
-                print(f"❌ Missing email at row {i}")
+            email = str(row['Email']).strip()
+            file_path = str(row['File']).strip()
+
+            # 🔍 DEBUG
+            print(f"\n➡ Sending to: {email}")
+            print(f"➡ File: {file_path}")
+            print(f"➡ Cert ID: {row.get('Certificate ID')}")
+
+            # ❌ skip if file missing
+            if not os.path.exists(file_path):
+                print(f"❌ File not found for {email}")
                 continue
 
-            file_path = row.get('File')
+            try:
+                msg = EmailMessage()
+                msg['Subject'] = "🎉 UNI6CTF 1.0 Certificate"
+                msg['From'] = EMAIL
+                msg['To'] = email
 
-            if not file_path or str(file_path) == "nan":
-                print(f"❌ Missing file for {row.get('Username')}")
-                continue
+                cert_id = row.get('Certificate ID', 'N/A')
 
-            msg = EmailMessage()
-            msg['Subject'] = "🎉 UNI6CTF 1.0 Certificate"
-            msg['From'] = EMAIL
-            msg['To'] = email
-
-            msg.set_content(f"""
-<!DOCTYPE html>
+                # ===============================
+                # 📩 HTML EMAIL
+                # ===============================
+                html_content = f"""<!DOCTYPE html>
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-    body {{
-        margin:0;
-        padding:0;
-        background:#000000;
-        font-family: Arial, sans-serif;
-        color:#ffffff;
-    }}
-
-    .container {{
-        max-width:600px;
-        margin:20px auto;
-        background:#121212;
-        border-radius:10px;
-        overflow:hidden;
-        border:1px solid #2a2a2a;
-    }}
-
-    .header {{
-        text-align:center;
-        padding:20px;
-        background:#000000;
-        border-bottom:2px solid #FFD700;
-    }}
-
-    .logo {{
-        width:80px;
-        margin-bottom:8px;
-    }}
-
-    .title {{
-        font-size:20px;
-        color:#FFD700;
-        font-weight:bold;
-    }}
-
-    .content {{
-        padding:25px;
-        font-size:14px;
-        line-height:1.6;
-        color:#ffffff;
-    }}
-
-    .highlight {{
-        color:#FFD700;
-        font-weight:bold;
-    }}
-
-    .card {{
-        background:#1c1c1c;
-        padding:15px;
-        border-radius:8px;
-        margin:20px 0;
-        border:1px solid #333;
-    }}
-
-    .button {{
-        display:inline-block;
-        background:#FFD700;
-        color:#000000 !important;
-        padding:12px 20px;
-        border-radius:6px;
-        text-decoration:none;
-        font-weight:bold;
-        margin-top:20px;
-    }}
-
-    .preview {{
-        margin-top:20px;
-        text-align:center;
-    }}
-
-    .preview img {{
-        width:100%;
-        border-radius:8px;
-        border:1px solid #333;
-    }}
-
-    .footer {{
-        text-align:center;
-        padding:15px;
-        font-size:12px;
-        color:#aaaaaa;
-        border-top:1px solid #2a2a2a;
-    }}
+body {{
+    margin:0;
+    padding:0;
+    background:#000;
+    font-family:Arial;
+    color:#fff;
+}}
+.container {{
+    max-width:600px;
+    margin:20px auto;
+    background:#121212;
+    border-radius:10px;
+    border:1px solid #2a2a2a;
+}}
+.header {{
+    text-align:center;
+    padding:20px;
+    border-bottom:2px solid #FFD700;
+}}
+.title {{
+    color:#FFD700;
+    font-size:20px;
+    font-weight:bold;
+}}
+.content {{
+    padding:25px;
+}}
+.card {{
+    background:#1c1c1c;
+    padding:15px;
+    border-radius:8px;
+    margin:20px 0;
+}}
+.button {{
+    display:inline-block;
+    background:#FFD700;
+    color:#000;
+    padding:12px 20px;
+    border-radius:6px;
+    text-decoration:none;
+}}
+.footer {{
+    text-align:center;
+    padding:15px;
+    font-size:12px;
+    color:#aaa;
+}}
 </style>
 </head>
 
@@ -155,103 +130,85 @@ with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
 
 <div class="container">
 
-    <!-- HEADER -->
-    <div class="header">
-        <img src="{LOGO_URL}" class="logo">
-        <div class="title">🏆 UNI6CTF 1.0 Certificate</div>
-    </div>
+<div class="header">
+<img src="{LOGO_URL}" width="80">
+<div class="title">🏆 UNI6CTF Certificate</div>
+</div>
 
-    <!-- CONTENT -->
-    <div class="content">
+<div class="content">
 
-        <p>Dear <span class="highlight">{row['Full Name']}</span>,</p>
+<p>Dear <b>{row['Full Name']}</b>,</p>
 
-        <p>
-        Congratulations on successfully participating in 
-        <span class="highlight">UNI6CTF 1.0 – Capture The Flag Competition</span>.
-        </p>
+<p>Congratulations on participating in UNI6CTF 1.0!</p>
 
-        <!-- DETAILS -->
-        <div class="card">
-            <b>Username:</b> {row['Username']}<br>
-            <b>Team:</b> {row['Team Name']}<br>
-            <b>Rank:</b> {row['Rank']}<br>
-            <b>Points:</b> {row['Points']}
-        </div>
+<div class="card">
+<b>Username:</b> {row['Username']}<br>
+<b>Team:</b> {row['Team Name']}<br>
+<b>Rank:</b> {row['Rank']}<br>
+<b>Points:</b> {row['Points']}
+</div>
 
-        <p>Your certificate is attached below.</p>
+<a href="{BASE_URL}{cert_id}" class="button">
+🔍 Verify Certificate
+</a>
 
-        <!-- BUTTON -->
-        <a href="{BASE_URL}{row['Certificate ID']}" class="button">
-            🔍 Verify Certificate
-        </a>
+<div style="margin-top:20px;">
+<img src="{CERT_BASE_URL}{row['Username']}.png" width="100%">
+</div>
 
-        <!-- PREVIEW -->
-        <div class="preview">
-            <p style="color:#FFD700;">Certificate Preview</p>
-            <img src="{CERT_BASE_URL}{row['Username']}.png">
-        </div>
+<p style="margin-top:20px;">
+UNI6CTF is a cybersecurity platform focused on real-world hacking skills.
+</p>
 
-        <p style="margin-top:25px;">
-        UNI6CTF is a student-driven cybersecurity initiative focused on real-world hacking skills, 
-        CTF competitions, and building a strong cybersecurity community.
-        </p>
-
-        <p>
-        We look forward to your participation in future competitions 🚀
-        </p>
-
-        <br>
-
-        <p>
-        Best Regards,<br><br>
-
-        <b>Madhuresh Kumar Jha</b><br>
-        CEO & Founder, UNI6CTF<br><br>
-
-        <b>Krish Pathania</b><br>
-        Co-Founder, UNI6CTF
-        </p>
-
-    </div>
-
-    <!-- FOOTER -->
-    <div class="footer">
-        🌐 uni6ctf.online<br>
-        📧 organizers@uni6ctf.online<br><br>
-        This is an automated email. Please do not reply.
-    </div>
+<p>
+Best Regards,<br>
+UNI6CTF Team
+</p>
 
 </div>
 
-<!-- TRACKING PIXEL -->
-<img src="{TRACK_URL}{row['Certificate ID']}" width="1" height="1">
+<div class="footer">
+🌐 uni6ctf.online<br>
+📧 organizers@uni6ctf.online
+</div>
+
+</div>
+
+<img src="{TRACK_URL}{cert_id}" width="1" height="1">
 
 </body>
 </html>
-""", subtype='html')
+"""
 
+                # ✅ TEXT + HTML (IMPORTANT FIX)
+                msg.set_content("Your certificate is attached.")
+                msg.add_alternative(html_content, subtype='html')
 
+                # ===============================
+                # 📎 ATTACH CERTIFICATE
+                # ===============================
+                with open(file_path, 'rb') as f:
+                    msg.add_attachment(
+                        f.read(),
+                        maintype='image',
+                        subtype='png',
+                        filename="certificate.png"
+                    )
 
-        # ✅ ATTACH CERTIFICATE
-            with open(file_path, 'rb') as f:
-                msg.add_attachment(
-                    f.read(),
-                    maintype='image',
-                    subtype='png',
-                    filename="certificate.png"
-                )
+                # ===============================
+                # 🚀 SEND EMAIL
+                # ===============================
+                server.send_message(msg)
 
-            # ✅ SEND MAIL (NO NEW CONNECTION)
-            server.send_message(msg)
+                print(f"✅ Sent: {email}")
 
-            print(f"✅ Sent: {email}")
+                time.sleep(1)  # prevent SMTP timeout
 
-            time.sleep(2)  # 🔥 prevent SMTP timeout
+            except Exception as e:
+                print(f"❌ Failed: {email} → {e}")
 
-        except Exception as e:
-            print(f"❌ Failed: {row.get('Username')} → {e}")
+    print("\n✅ All Emails Sent Successfully!")
 
-    
-
+except Exception as e:
+    print("❌ SMTP Error:", e)
 
