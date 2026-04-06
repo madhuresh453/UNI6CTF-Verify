@@ -62,7 +62,7 @@ try:
 
             try:
                 msg = EmailMessage()
-                msg['Subject'] = "🎉 UNI6CTF 1.0 Certificate"
+                msg['Subject'] = "🎉🎉 UNI6CTF 1.0 Certificate 🎉🎉"
                 msg['From'] = EMAIL
                 msg['To'] = email
 
@@ -76,92 +76,110 @@ try:
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
 <style>
     body {{
         margin:0;
         padding:0;
-        background:#000000;
+        background:#0f172a;
         font-family: Arial, sans-serif;
-        color:#ffffff;
+        color:#f3f4f6;
     }}
 
     .container {{
         max-width:600px;
         margin:20px auto;
-        background:#121212;
-        border-radius:10px;
+        background:#111827;
+        border-radius:12px;
         overflow:hidden;
-        border:1px solid #2a2a2a;
+        border:1px solid #1f1f1f;
+        box-shadow:0 0 20px rgba(0,0,0,0.6);
     }}
 
     .header {{
         text-align:center;
-        padding:20px;
-        background:#000000;
-        border-bottom:2px solid #FFD700;
+        padding:25px;
+        background:linear-gradient(135deg, #020617, #0f172a);
+        border-bottom:2px solid #facc15;
     }}
 
     .logo {{
-        width:80px;
-        margin-bottom:8px;
+        width:90px;
+        margin-bottom:10px;
+        filter: brightness(1.2);
+         border-radius:50%;
+    object-fit:cover;
+    border:2px solid #facc15;
     }}
 
     .title {{
-        font-size:20px;
-        color:#FFD700;
+        font-size:22px;
+        color:#facc15 !important;
         font-weight:bold;
+        letter-spacing:0.5px;
+        text-shadow:0 0 8px rgba(250,204,21,0.5);
     }}
 
     .content {{
-        padding:25px;
+        padding:28px;
         font-size:14px;
-        line-height:1.6;
-        color:#ffffff;
+        line-height:1.7;
+        color:#f3f4f6 !important;
     }}
 
     .highlight {{
-        color:#FFD700;
+        color:#facc15;
         font-weight:bold;
     }}
 
     .card {{
-        background:#1c1c1c;
-        padding:15px;
-        border-radius:8px;
-        margin:20px 0;
-        border:1px solid #333;
+        background:#1e293b;
+        padding:16px;
+        border-radius:10px;
+        margin:22px 0;
+        border:1px solid #2a2a2a;
+        box-shadow:0 0 10px rgba(0,0,0,0.4);
     }}
 
     .button {{
         display:inline-block;
-        background:#FFD700;
+        background:linear-gradient(135deg, #facc15, #eab308);
         color:#000000 !important;
-        padding:12px 20px;
-        border-radius:6px;
+        padding:12px 22px;
+        border-radius:8px;
         text-decoration:none;
         font-weight:bold;
         margin-top:20px;
+        box-shadow:0 0 10px rgba(250,204,21,0.4);
+    }}
+
+    .button:hover {{
+        background:#fde047;
     }}
 
     .preview {{
-        margin-top:20px;
+        margin-top:25px;
         text-align:center;
     }}
 
     .preview img {{
         width:100%;
-        border-radius:8px;
-        border:1px solid #333;
+        border-radius:10px;
+        border:1px solid #2a2a2a;
+        box-shadow:0 0 12px rgba(0,0,0,0.5);
     }}
 
     .footer {{
         text-align:center;
-        padding:15px;
-        font-size:12px;
-        color:#aaaaaa;
-        border-top:1px solid #2a2a2a;
+    padding:18px;
+    font-size:12px;
+    color:#9ca3af !important;
+    border-top:1px solid #1f2937;
+    background:#020617;
     }}
 </style>
+
 </head>
 
 <body>
@@ -180,7 +198,7 @@ try:
         <p>Dear <span class="highlight">{row['Full Name']}</span>,</p>
 
         <p>
-        Congratulations on successfully participating in 
+        successfully completed participation in 
         <span class="highlight">UNI6CTF 1.0 – Capture The Flag Competition</span>.
         </p>
 
@@ -192,7 +210,7 @@ try:
             <b>Points:</b> {row['Points']}
         </div>
 
-        <p>Your certificate is attached below.</p>
+        <p>Your certificate has been generated and is attached</p>
 
         <!-- BUTTON -->
         <a href="{BASE_URL}{row['Certificate ID']}" class="button">
@@ -201,13 +219,12 @@ try:
 
         <!-- PREVIEW -->
         <div class="preview">
-            <p style="color:#FFD700;">Certificate Preview</p>
-            <img src="{CERT_BASE_URL}{row['Username']}.png">
+            <p style="color:#facc15;">Certificate Preview</p>
+            <img src="https://verify.uni6ctf.online/certificates/{row['Username']}.png">
         </div>
 
         <p style="margin-top:25px;">
-        UNI6CTF is a student-driven cybersecurity initiative focused on real-world hacking skills, 
-        CTF competitions, and building a strong cybersecurity community.
+        UNI6CTF is a student-driven cybersecurity initiative focused on developing real-world hacking skills, organizing CTF competitions, and building a strong cybersecurity community.
         </p>
 
         <p>
@@ -219,10 +236,10 @@ try:
         <p>
         Best Regards,<br><br>
 
-        <b>Madhuresh Kumar Jha</b><br>
+        <b style="color:#ffffff;">Madhuresh Kumar Jha</b><br>
         CEO & Founder, UNI6CTF<br><br>
 
-        <b>Krish Pathania</b><br>
+        <b style="color:#ffffff;">Krish Pathania</b><br>
         Co-Founder, UNI6CTF
         </p>
 
