@@ -170,7 +170,7 @@ try:
 
     <!-- HEADER -->
     <div class="header">
-        <img src="{LOGO_URL}" class="logo">
+        <img src="cid:logo" class="logo">
         <div class="title">🏆 UNI6CTF 1.0 Certificate</div>
     </div>
 
@@ -247,7 +247,13 @@ try:
                 # ✅ TEXT + HTML (IMPORTANT FIX)
                 msg.set_content("Your certificate is attached.")
                 msg.add_alternative(html_content, subtype='html')
-
+                with open("UNI6CTF_logo.png", "rb") as f:
+                    msg.get_payload()[1].add_related(
+                        f.read(),
+                        maintype="image",
+                        subtype="png",
+                        cid="logo"
+                    )
                 # ===============================
                 # 📎 ATTACH CERTIFICATE
                 # ===============================
