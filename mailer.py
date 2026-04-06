@@ -18,6 +18,11 @@ if not os.path.exists(csv_path) or os.path.getsize(csv_path) == 0:
     exit()
 
 df = pd.read_csv(csv_path)
+# ===============================
+# ✅ ADD EMAIL SENT COLUMN
+# ===============================
+if 'Email Sent' not in df.columns:
+    df['Email Sent'] = False
 
 # 🔥 CLEAN COLUMN NAMES
 df.columns = df.columns.str.strip()
@@ -45,15 +50,22 @@ try:
         # ===============================
         # 📧 SEND EMAIL LOOP
         # ===============================
-        for _, row in df.iterrows():
+        
+        for i, row in df.iterrows():
+
+            # ❌ SKIP ALREADY SENT
+            if row.get('Email Sent') == True:
+                print(f"⏩ Skipping {row['Email']} (already sent)")
+                continue
 
             email = str(row['Email']).strip()
             file_path = str(row['File']).strip()
+            cert_id = row.get('Certificate ID', 'N/A')
 
             # 🔍 DEBUG
             print(f"\n➡ Sending to: {email}")
             print(f"➡ File: {file_path}")
-            print(f"➡ Cert ID: {row.get('Certificate ID')}")
+            print(f"➡ Cert ID: {cert_id}")
 
             # ❌ skip if file missing
             if not os.path.exists(file_path):
@@ -65,6 +77,23 @@ try:
                 msg['Subject'] = "🎉🎉 UNI6CTF 1.0 Certificate 🎉🎉"
                 msg['From'] = EMAIL
                 msg['To'] = email
+
+                cert_id = row.get('Certificate ID', 'N/A')
+
+                # (your HTML + attachment code here)
+
+                # 🚀 SEND EMAIL
+                server.send_message(msg)
+
+                # ✅ MARK AS SENT
+                df.loc[i, 'Email Sent'] = True
+
+                print(f"✅ Sent: {email}")
+
+                time.sleep(1)
+
+            except Exception as e:
+                print(f"❌ Failed: {email} → {e}")
 
                 cert_id = row.get('Certificate ID', 'N/A')
 
@@ -286,6 +315,7 @@ try:
                 # 🚀 SEND EMAIL
                 # ===============================
                 server.send_message(msg)
+                df.loc[i, 'Email Sent'] = True
 
                 print(f"✅ Sent: {email}")
 
@@ -293,9 +323,11 @@ try:
 
             except Exception as e:
                 print(f"❌ Failed: {email} → {e}")
-
+    df.to_csv(csv_path, index=False)
     print("\n✅ All Emails Sent Successfully!")
 
 except Exception as e:
     print("❌ SMTP Error:", e)
+    
+    
 
