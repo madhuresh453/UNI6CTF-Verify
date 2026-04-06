@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Certificate Verification</title>
+
+<style>
+:root {
+    --gold:#FFD700;
+    --bg:#0b0b0b;
+    --card:#121212;
+}
+
+body {
+    margin:0;
+    font-family:'Segoe UI', Arial;
+    background:radial-gradient(circle at top,#111,#000);
+    color:white;
+}
+
+/* 🌗 Toggle */
+.toggle {
+    position:absolute;
+    right:20px;
+    top:20px;
+    cursor:pointer;
+}
+
+/* CONTAINER */
+.container {
+    max-width:720px;
+    margin:40px auto;
+    background:rgba(18,18,18,0.95);
+    border-radius:16px;
+    border:1px solid #222;
+    backdrop-filter:blur(12px);
+    box-shadow:0 0 80px rgba(255,215,0,0.1);
+}
+
+/* HEADER */
+.header {
+    text-align:center;
+    padding:25px;
+    border-bottom:2px solid var(--gold);
+}
+
+.logo {
+    font-size:14px;
+    color:#aaa;
+}
+
+.tick {
+    font-size:42px;
+    color:#00ff99;
+    animation:pop 0.6s ease;
+}
+
+@keyframes pop {
+    0% {transform:scale(0);}
+    100% {transform:scale(1);}
+}
+
+.title {
+    font-size:24px;
+    color:var(--gold);
+    font-weight:bold;
+}
+
+/* CONTENT */
+.content {
+    padding:30px;
+    text-align:center;
+}
+
+.name {
+    font-size:26px;
+    font-weight:bold;
+}
+
+/* CARD */
+.card {
+    margin-top:20px;
+    background:var(--card);
+    padding:20px;
+    border-radius:12px;
+    border:1px solid #333;
+    transition:0.3s;
+}
+
+.card:hover {
+    transform:translateY(-4px);
+    box-shadow:0 0 20px rgba(255,215,0,0.2);
+}
+
+/* BADGE */
+.status {
+    margin-top:10px;
+    display:inline-block;
+    padding:6px 12px;
+    background:#0f5132;
+    border-radius:20px;
+    font-size:13px;
+}
+
+/* META */
+.meta {
+    margin-top:10px;
+    color:#aaa;
+    font-size:13px;
+}
+
+/* BUTTON */
+.btn {
+    margin-top:20px;
+    padding:12px 20px;
+    background:var(--gold);
+    color:black;
+    border-radius:8px;
+    font-weight:bold;
+    text-decoration:none;
+    display:inline-block;
+}
+
+.btn:hover {
+    transform:scale(1.05);
+    background:#ffcc00;
+}
+
+/* SHARE */
+.share button {
+    margin:5px;
+    padding:8px 12px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.linkedin {background:#0077b5;color:white;}
+.twitter {background:#1DA1F2;color:white;}
+.copy {background:#333;color:white;}
+
+/* CERT */
+.certificate img {
+    width:100%;
+    margin-top:20px;
+    border-radius:10px;
+    border:1px solid #333;
+}
+
+/* QR ANIMATION */
+.qr {
+    margin-top:10px;
+    animation:pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {opacity:0.6;}
+    50% {opacity:1;}
+    100% {opacity:0.6;}
+}
+
+/* FOOTER */
+.footer {
+    text-align:center;
+    padding:15px;
+    font-size:12px;
+    color:#aaa;
+    border-top:1px solid #222;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="header">
+    <div class="logo">UNI6CTF • Cybersecurity Excellence Platform</div>
+    <div class="tick">✔</div>
+    <div class="title">Certificate Verified</div>
+</div>
+
+<div class="content">
+
+<div class="name">{{ data['Full Name'] }}</div>
+
+<!-- STATUS -->
+<div class="status">🟢 Verified Authentic Certificate</div>
+
+<!-- CARD -->
+<div class="card">
+    Username: {{ data['Username'] }} <br>
+    Team: {{ data['Team Name'] }} <br>
+    Rank: {{ data['Rank'] }} <br>
+    Points: {{ data['Points'] }}
+
+    <div class="meta">
+        Certificate ID: {{ data['Certificate ID'] }} <br>
+        Issued On: 2026 <br>
+        Verified On: Today
+    </div>
+</div>
+
+<!-- DOWNLOAD -->
+<a href="/secure/{{ data['Certificate ID'] }}" class="btn">
+⬇ Download Certificate
+</a>
+
+<!-- SHARE -->
+<div class="share">
+<button class="linkedin" onclick="shareLinkedIn()">LinkedIn</button>
+<button class="twitter" onclick="shareTwitter()">Twitter</button>
+<button class="copy" onclick="copyLink()">Copy Link</button>
+</div>
+
+<!-- CERT -->
+<div class="certificate">
+<img src="/secure/{{ data['Certificate ID'] }}">
+</div>
+
+<!-- QR BADGE -->
+<div class="qr">🔐 Verified via QR Authentication</div>
+
+</div>
+
+<div class="footer">
+© UNI6CTF • Verification System
+</div>
+
+</div>
+
+<script>
+function copyLink(){
+    navigator.clipboard.writeText(window.location.href);
+    alert("Copied!");
+}
+function shareLinkedIn(){
+    window.open("https://www.linkedin.com/sharing/share-offsite/?url="+encodeURIComponent(location.href));
+}
+function shareTwitter(){
+    window.open("https://twitter.com/intent/tweet?url="+encodeURIComponent(location.href));
+}
+</script>
+
+</body>
+</html>
