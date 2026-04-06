@@ -80,22 +80,7 @@ try:
 
                 cert_id = row.get('Certificate ID', 'N/A')
 
-                # (your HTML + attachment code here)
-
-                # 🚀 SEND EMAIL
-                server.send_message(msg)
-
-                # ✅ MARK AS SENT
-                df.loc[i, 'Email Sent'] = True
-
-                print(f"✅ Sent: {email}")
-
-                time.sleep(1)
-
-            except Exception as e:
-                print(f"❌ Failed: {email} → {e}")
-
-                cert_id = row.get('Certificate ID', 'N/A')
+               
 
                 # ===============================
                 # 📩 HTML EMAIL
@@ -328,6 +313,7 @@ try:
 
 except Exception as e:
     print("❌ SMTP Error:", e)
+    
     
     
 
