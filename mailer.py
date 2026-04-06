@@ -72,57 +72,95 @@ try:
                 # 📩 HTML EMAIL
                 # ===============================
                 html_content = f"""<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body {{
-    margin:0;
-    padding:0;
-    background:#000;
-    font-family:Arial;
-    color:#fff;
-}}
-.container {{
-    max-width:600px;
-    margin:20px auto;
-    background:#121212;
-    border-radius:10px;
-    border:1px solid #2a2a2a;
-}}
-.header {{
-    text-align:center;
-    padding:20px;
-    border-bottom:2px solid #FFD700;
-}}
-.title {{
-    color:#FFD700;
-    font-size:20px;
-    font-weight:bold;
-}}
-.content {{
-    padding:25px;
-}}
-.card {{
-    background:#1c1c1c;
-    padding:15px;
-    border-radius:8px;
-    margin:20px 0;
-}}
-.button {{
-    display:inline-block;
-    background:#FFD700;
-    color:#000;
-    padding:12px 20px;
-    border-radius:6px;
-    text-decoration:none;
-}}
-.footer {{
-    text-align:center;
-    padding:15px;
-    font-size:12px;
-    color:#aaa;
-}}
+    body {{
+        margin:0;
+        padding:0;
+        background:#000000;
+        font-family: Arial, sans-serif;
+        color:#ffffff;
+    }}
+
+    .container {{
+        max-width:600px;
+        margin:20px auto;
+        background:#121212;
+        border-radius:10px;
+        overflow:hidden;
+        border:1px solid #2a2a2a;
+    }}
+
+    .header {{
+        text-align:center;
+        padding:20px;
+        background:#000000;
+        border-bottom:2px solid #FFD700;
+    }}
+
+    .logo {{
+        width:80px;
+        margin-bottom:8px;
+    }}
+
+    .title {{
+        font-size:20px;
+        color:#FFD700;
+        font-weight:bold;
+    }}
+
+    .content {{
+        padding:25px;
+        font-size:14px;
+        line-height:1.6;
+        color:#ffffff;
+    }}
+
+    .highlight {{
+        color:#FFD700;
+        font-weight:bold;
+    }}
+
+    .card {{
+        background:#1c1c1c;
+        padding:15px;
+        border-radius:8px;
+        margin:20px 0;
+        border:1px solid #333;
+    }}
+
+    .button {{
+        display:inline-block;
+        background:#FFD700;
+        color:#000000 !important;
+        padding:12px 20px;
+        border-radius:6px;
+        text-decoration:none;
+        font-weight:bold;
+        margin-top:20px;
+    }}
+
+    .preview {{
+        margin-top:20px;
+        text-align:center;
+    }}
+
+    .preview img {{
+        width:100%;
+        border-radius:8px;
+        border:1px solid #333;
+    }}
+
+    .footer {{
+        text-align:center;
+        padding:15px;
+        font-size:12px;
+        color:#aaaaaa;
+        border-top:1px solid #2a2a2a;
+    }}
 </style>
 </head>
 
@@ -130,51 +168,77 @@ body {{
 
 <div class="container">
 
-<div class="header">
-<img src="{LOGO_URL}" width="80">
-<div class="title">🏆 UNI6CTF Certificate</div>
+    <!-- HEADER -->
+    <div class="header">
+        <img src="{LOGO_URL}" class="logo">
+        <div class="title">🏆 UNI6CTF 1.0 Certificate</div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+        <p>Dear <span class="highlight">{row['Full Name']}</span>,</p>
+
+        <p>
+        Congratulations on successfully participating in 
+        <span class="highlight">UNI6CTF 1.0 – Capture The Flag Competition</span>.
+        </p>
+
+        <!-- DETAILS -->
+        <div class="card">
+            <b>Username:</b> {row['Username']}<br>
+            <b>Team:</b> {row['Team Name']}<br>
+            <b>Rank:</b> {row['Rank']}<br>
+            <b>Points:</b> {row['Points']}
+        </div>
+
+        <p>Your certificate is attached below.</p>
+
+        <!-- BUTTON -->
+        <a href="{BASE_URL}{row['Certificate ID']}" class="button">
+            🔍 Verify Certificate
+        </a>
+
+        <!-- PREVIEW -->
+        <div class="preview">
+            <p style="color:#FFD700;">Certificate Preview</p>
+            <img src="{CERT_BASE_URL}{row['Username']}.png">
+        </div>
+
+        <p style="margin-top:25px;">
+        UNI6CTF is a student-driven cybersecurity initiative focused on real-world hacking skills, 
+        CTF competitions, and building a strong cybersecurity community.
+        </p>
+
+        <p>
+        We look forward to your participation in future competitions 🚀
+        </p>
+
+        <br>
+
+        <p>
+        Best Regards,<br><br>
+
+        <b>Madhuresh Kumar Jha</b><br>
+        CEO & Founder, UNI6CTF<br><br>
+
+        <b>Krish Pathania</b><br>
+        Co-Founder, UNI6CTF
+        </p>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        🌐 uni6ctf.online<br>
+        📧 organizers@uni6ctf.online<br><br>
+        This is an automated email. Please do not reply.
+    </div>
+
 </div>
 
-<div class="content">
-
-<p>Dear <b>{row['Full Name']}</b>,</p>
-
-<p>Congratulations on participating in UNI6CTF 1.0!</p>
-
-<div class="card">
-<b>Username:</b> {row['Username']}<br>
-<b>Team:</b> {row['Team Name']}<br>
-<b>Rank:</b> {row['Rank']}<br>
-<b>Points:</b> {row['Points']}
-</div>
-
-<a href="{BASE_URL}{cert_id}" class="button">
-🔍 Verify Certificate
-</a>
-
-<div style="margin-top:20px;">
-<img src="{CERT_BASE_URL}{row['Username']}.png" width="100%">
-</div>
-
-<p style="margin-top:20px;">
-UNI6CTF is a cybersecurity platform focused on real-world hacking skills.
-</p>
-
-<p>
-Best Regards,<br>
-UNI6CTF Team
-</p>
-
-</div>
-
-<div class="footer">
-🌐 uni6ctf.online<br>
-📧 organizers@uni6ctf.online
-</div>
-
-</div>
-
-<img src="{TRACK_URL}{cert_id}" width="1" height="1">
+<!-- TRACKING PIXEL -->
+<img src="{TRACK_URL}{row['Certificate ID']}" width="1" height="1">
 
 </body>
 </html>

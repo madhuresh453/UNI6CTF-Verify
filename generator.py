@@ -13,20 +13,29 @@ import hashlib
 df = pd.read_csv("data/participants.csv")
 df.columns = df.columns.str.strip()
 
+# Remove duplicate usernames (safety)
+df = df.drop_duplicates(subset=["Username"])
+
 template_path = "templates/certificate.png"
 font_path = "fonts/arial.ttf"
 
 os.makedirs("output/certificates", exist_ok=True)
 
 # ===============================
-# 🔢 LOAD LAST CERT ID (SAFE)
+# 📂 LOAD OLD DATA (FOR RESUME + SKIP)
 # ===============================
 start_index = 1
+done_usernames = set()
 
 if os.path.exists("output/final_data.csv") and os.path.getsize("output/final_data.csv") > 0:
     old_df = pd.read_csv("output/final_data.csv")
     old_df.columns = old_df.columns.str.strip()
 
+    # ✅ Get already generated usernames
+    if 'Username' in old_df.columns:
+        done_usernames = set(old_df['Username'])
+
+    # ✅ Get last certificate ID
     if 'Certificate ID' in old_df.columns:
         last_ids = old_df['Certificate ID'].dropna()
 
@@ -37,20 +46,37 @@ if os.path.exists("output/final_data.csv") and os.path.getsize("output/final_dat
             start_index = last_num + 1
 
 # ===============================
+# 🔢 CERTIFICATE COUNTER
+# ===============================
+current_index = start_index
+
+# ===============================
 # 🔁 LOOP THROUGH USERS
 # ===============================
+new_rows = []
+
 for i, row in df.iterrows():
 
+    username = str(row['Username'])
+
+    # ❌ Skip already generated users
+    if username in done_usernames:
+        print(f"⏩ Skipping {username} (already generated)")
+        continue
+
+    # ===============================
+    # 🎨 CREATE CERTIFICATE
+    # ===============================
     img = Image.open(template_path).convert("RGB")
     draw = ImageDraw.Draw(img)
 
-    # ✅ UNIQUE CERT ID
-    cert_id = generate_cert_id(start_index + i)
+    # ✅ UNIQUE CERT ID (FIXED)
+    cert_id = generate_cert_id(current_index)
+    current_index += 1
+
     verify_link = BASE_URL + cert_id
     hash_value = hashlib.sha256(cert_id.encode()).hexdigest()
-    df.loc[i, 'Hash'] = hash_value
-
-    username = str(row['Username'])
+    
     team = str(row['Team Name'])
     rank = str(row['Rank'])
     points = str(row['Points'])
@@ -134,29 +160,46 @@ for i, row in df.iterrows():
     filename = f"output/certificates/{username}.png"
     img.save(filename)
 
-    # ✅ UPDATE DF (INSIDE LOOP)
-    df.loc[i, 'Certificate ID'] = cert_id
-    df.loc[i, 'File'] = filename
+    # ===============================
+    # 📝 STORE NEW ROW (ONLY NEW USERS)
+    # ===============================
+    new_rows.append({
+        'Full Name': full_name,
+        'Username': username,
+        'Team Name': team,
+        'Rank': rank,
+        'Points': points,
+        'Email': row['Email'],
+        'Certificate ID': cert_id,
+        'File': filename
+    })
 
     print(f"✅ Generated: {username}")
 
 # ===============================
-# 💾 SAVE CSV (ONCE)
+# 💾 SAVE CSV (ONLY NEW DATA)
 # ===============================
 output_file = "output/final_data.csv"
 
 columns = ['Full Name', 'Username', 'Team Name', 'Rank', 'Points', 'Email', 'Certificate ID', 'File']
-df = df[columns]
 
-if os.path.exists(output_file) and os.path.getsize(output_file) > 0:
-    old_df = pd.read_csv(output_file)
-    old_df.columns = old_df.columns.str.strip()
+if new_rows:
+    new_df = pd.DataFrame(new_rows)
+    new_df = new_df[columns]
 
-    final_df = pd.concat([old_df, df], ignore_index=True)
-    final_df = final_df.drop_duplicates(subset=['Certificate ID'], keep='last')
+    if os.path.exists(output_file) and os.path.getsize(output_file) > 0:
+        old_df = pd.read_csv(output_file)
+        old_df.columns = old_df.columns.str.strip()
 
-    final_df.to_csv(output_file, index=False)
+        final_df = pd.concat([old_df, new_df], ignore_index=True)
+
+        # ✅ REMOVE DUPLICATES SAFELY
+        final_df = final_df.drop_duplicates(subset=['Username'], keep='last')
+
+        final_df.to_csv(output_file, index=False)
+    else:
+        new_df.to_csv(output_file, index=False)
+
+    print("🎉 New Certificates Added Successfully!")
 else:
-    df.to_csv(output_file, index=False)
-
-print("🎉 All Certificates Generated Successfully!")
+    print("⚠️ No new users to process")
