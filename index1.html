@@ -1,0 +1,815 @@
+
+import pandas as pd
+import smtplib
+import ssl
+from email.message import EmailMessage
+import time
+import os
+
+from config import EMAIL, PASSWORD, SMTP_SERVER, SMTP_PORT, BASE_URL, LOGO_URL, CERT_BASE_URL, TRACK_URL
+
+# ===============================
+# 📂 LOAD DATA
+# ===============================
+csv_path = "output/final_datalpu.csv"
+
+if not os.path.exists(csv_path) or os.path.getsize(csv_path) == 0:
+    print("❌ No data found. Run generator first.")
+    exit()
+
+df = pd.read_csv(csv_path)
+df["Email Sent"] = df["Email Sent"].fillna(False)
+df["Email Sent"] = df["Email Sent"].replace("True", True)
+df["Email Sent"] = df["Email Sent"].replace("False", False)
+df["Email Sent"] = df["Email Sent"].astype(bool)
+# ===============================
+# ✅ ADD EMAIL SENT COLUMN
+# ===============================
+if 'Email Sent' not in df.columns:
+    df['Email Sent'] = False
+
+# 🔥 CLEAN COLUMN NAMES
+df.columns = df.columns.str.strip()
+print("Columns:", df.columns.tolist())
+
+# ===============================
+# 🧹 CLEAN DATA
+# ===============================
+df = df[df['Email'].notna()]
+
+df = df.drop_duplicates(subset=['Email'], keep='last')
+
+print("📊 Total emails to send:", len(df))
+
+# ===============================
+# 🔐 SMTP SETUP
+# ===============================
+context = ssl.create_default_context()
+
+try:
+    with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+        server.starttls(context=context)
+        server.login(EMAIL, PASSWORD)
+
+        # ===============================
+        # 📧 SEND EMAIL LOOP
+        # ===============================
+        
+        for i, row in df.iterrows():
+
+            # ❌ SKIP ALREADY SENT
+            if row.get('Email Sent') == True:
+                print(f"⏩ Skipping {row['Email']} (already sent)")
+                continue
+
+            email = str(row['Email']).strip()
+            
+            
+
+            # 🔍 DEBUG
+            print(f"\n➡ Sending to: {email}")
+            
+            
+
+            # ❌ skip if file missing
+            
+                
+
+            try:
+                msg = EmailMessage()
+                msg['Subject'] = "CyberWar 2026 : Capture The Flag is Here - Registrations are Open!"
+                msg['From'] = EMAIL
+                msg['To'] = email
+
+                
+
+               
+
+                # ===============================
+                # 📩 HTML EMAIL
+                # ===============================
+                html_content = f"""<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
+  <head>
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta charset="UTF-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <title>
+      CYBERWAR: Capture The Flag 2026
+    </title>
+    <style>
+      body, table, td, a {{ -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }} 
+table, td {{ mso-table-lspace: 0pt; mso-table-rspace: 0pt; }} 
+img {{ -ms-interpolation-mode: bicubic; border: 0; display: block; }} 
+
+@media only screen and (max-width: 600px) {{ 
+  .wrapper {{ width: 100% !important; }} 
+  .mobile-pad {{ padding: 20px 16px !important; }} 
+  .hero-title {{ font-size: 38px !important; letter-spacing: 2px !important; }} 
+  .hero-sub {{ font-size: 15px !important; letter-spacing: 4px !important; }} 
+  .prize-main {{ font-size: 48px !important; }} 
+  .detail-cell {{ display: block !important; width: 100% !important; margin-bottom: 10px !important; }} 
+  .skill-cell {{ padding: 10px 6px !important; }} 
+  .sponsor-cell {{ padding: 12px 8px !important; }} 
+  .social-btn {{ display: block !important; margin: 6px auto !important; width: 80% !important; }} 
+  .half-col {{ display: block !important; width: 100% !important; }} 
+}}
+    </style>
+    <!--[if mso]><xml>
+    <w:WordDocument xmlns:w="urn:schemas-microsoft-com:office:word">
+      <w:DontUseAdvancedTypographyReadingMail/>
+    </w:WordDocument>
+    </xml><![endif]-->
+  </head>
+  <body style="background: #0a0a0f; margin: 0; padding: 0">
+    <!-- OUTER WRAPPER -->
+    <table cellpadding="0" cellspacing="0" role="presentation" width="100%" border="0" dir="ltr" style="background: #0a0a0f">
+      <tr>
+        <td align="center" style="padding: 0">
+          <!-- EMAIL CONTAINER -->
+          <table cellspacing="0" role="presentation" width="620" border="0" cellpadding="0" class="wrapper" style="width: 100%; background: #0a0a0f; max-width: 620px">
+            <!-- ══ HEADER LOGO BAR ══ -->
+            <tr>
+              <td style="padding: 16px 28px; border-bottom: 1px solid #1e1e30; background: #0d0d18">
+                <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                  <tr>
+                    <td style="vertical-align: middle">
+                      <img alt="LPU" height="auto" src="https://raw.githubusercontent.com/Pritamongithub/event-assets/refs/heads/main/social-logo-lpu-big%201.png" width="100" style="display: block; height: 32px; width: auto">
+                    </td>
+                    <td align="right" style="vertical-align: middle">
+                      <img alt="Astitwam" height="auto" src="https://raw.githubusercontent.com/Pritamongithub/event-assets/refs/heads/main/Astitwam%201.png" width="120" style="height: 32px; width: auto; margin-left: auto; display: block">
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- ══ HERO ══ -->
+            <tr>
+              <td style="border-bottom: 2px solid #c83228; background: linear-gradient(160deg,#0d0d18 0%,#0a0a0f 40%,#110a0a 100%); padding: 40px 28px 36px; text-align: center">
+                <!-- Title sponsor tag -->
+                <table cellpadding="0" cellspacing="0" role="presentation" align="center" border="0" style="margin: 0 auto 22px">
+                  <tr>
+                    <td esd-text="true" class="esd-text" style="border: 1px solid rgba(230,80,20,0.4); border-radius: 2px; padding: 5px 14px; background: rgba(230,80,20,0.12)">
+                      <span style="letter-spacing: 3px; color: #e85020; text-transform: uppercase; font-family: &#39;Courier New&#39;,monospace; font-size: 10px">
+                        Title Sponsor: Quick Heal Academy
+                      </span>
+                    </td>
+                  </tr>
+                </table>
+                <!-- Event name -->
+                <div esd-text="true" class="hero-title esd-text" style="font-weight: 700; font-size: 52px; letter-spacing: 4px; line-height: 1; color: #ffffff; text-transform: uppercase; margin-bottom: 6px; font-family: Georgia,&#39;Times New Roman&#39;,serif">
+                  CYBERWAR
+                </div>
+                <div esd-text="true" class="hero-sub esd-text" style="text-transform: uppercase; margin-bottom: 16px; font-weight: bold; font-family: Georgia,&#39;Times New Roman&#39;,serif; font-size: 18px; letter-spacing: 7px; color: #c83228">
+                  Capture The Flag
+                </div>
+                <div esd-text="true" class="esd-text" style="font-family: &#39;Courier New&#39;,monospace; font-size: 12px; letter-spacing: 5px; color: #777; text-transform: uppercase; margin-bottom: 28px">
+                  <p style="text-align: center">
+                    Solve · Decode · Triumph
+                  </p>
+                </div>
+                <!-- Badges -->
+                <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td esd-text="true" class="esd-text" style="padding: 3px">
+                      <span style="padding: 5px 11px; border-radius: 2px; text-transform: uppercase; display: inline-block; border: 1px solid rgba(200,50,40,0.4); font-family: &#39;Courier New&#39;,monospace; letter-spacing: 2px; background: rgba(200,50,40,0.14); color: #e06050; font-size: 9px">
+                        24-Hour CTF
+                      </span>
+                    </td>
+                    <td esd-text="true" class="esd-text" style="padding: 3px">
+                      <span style="padding: 5px 11px; color: #999; font-family: &#39;Courier New&#39;,monospace; border-radius: 2px; display: inline-block; background: rgba(255,255,255,0.04); letter-spacing: 2px; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.1); font-size: 9px">
+                        Inter University National Level
+                      </span>
+                    </td>
+                    <td esd-text="true" class="esd-text" style="padding: 3px">
+                      <span style="font-family: &#39;Courier New&#39;,monospace; font-size: 9px; display: inline-block; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); letter-spacing: 2px; border-radius: 2px; padding: 5px 11px; text-transform: uppercase; color: #999">
+                        27–28 April 2026
+                      </span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- ══ PRIZE BLOCK ══ -->
+            <tr>
+              <td style="text-align: center; border-bottom: 1px solid #1e1e30; background: #0f0808; padding: 40px 28px">
+                <div esd-text="true" class="esd-text" style="font-family: &#39;Courier New&#39;,monospace; font-size: 9px; letter-spacing: 3px; color: #555; text-transform: uppercase; margin-bottom: 12px">
+                  Total Prize Pool
+                </div>
+                <div esd-text="true" class="prize-main esd-text" style="font-weight: 700; font-size: 60px; color: #e85020; line-height: 1; letter-spacing: 2px; margin-bottom: 4px; font-family: Georgia,&#39;Times New Roman&#39;,serif">
+                  2 LAKH+
+                </div>
+                <div esd-text="true" class="esd-text" style="text-transform: uppercase; margin-bottom: 28px; opacity: 0.85; font-family: Georgia,serif; font-weight: 700; font-size: 18px; color: #e85020; letter-spacing: 5px">
+                  Prize Pool
+                </div>
+                <!-- Prize breakdown -->
+                <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="margin: 0 auto 24px">
+                  <tr>
+                    <td class="detail-cell" style="padding: 6px">
+                      <table cellpadding="0" cellspacing="0" role="presentation" border="0" style="min-width: 130px; border: 1px solid rgba(212,175,55,0.4); border-radius: 4px">
+                        <tr>
+                          <td style="text-align: center; padding: 14px 18px">
+                            <div esd-text="true" class="esd-text" style="letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; font-family: &#39;Courier New&#39;,monospace; font-size: 9px; color: #666">
+                              1st Place
+                            </div>
+                            <div esd-text="true" class="esd-text" style="font-family: Georgia,serif; font-weight: 700; font-size: 24px; color: #d4af37">
+                              ₹20,000
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                    <td class="detail-cell" style="padding: 6px">
+                      <table cellpadding="0" cellspacing="0" role="presentation" border="0" style="border: 1px solid rgba(180,180,180,0.3); border-radius: 4px; min-width: 130px">
+                        <tr>
+                          <td style="padding: 14px 18px; text-align: center">
+                            <div esd-text="true" class="esd-text" style="color: #666; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; font-family: &#39;Courier New&#39;,monospace; font-size: 9px">
+                              2nd Place
+                            </div>
+                            <div esd-text="true" class="esd-text" style="font-family: Georgia,serif; font-weight: 700; font-size: 24px; color: #b8b8b8">
+                              ₹10,000
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                    <td class="detail-cell" style="padding: 6px">
+                      <table cellspacing="0" role="presentation" border="0" cellpadding="0" style="min-width: 130px; border: 1px solid rgba(180,100,40,0.3); border-radius: 4px">
+                        <tr>
+                          <td style="padding: 14px 18px; text-align: center">
+                            <div esd-text="true" class="esd-text" style="font-size: 9px; color: #666; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; font-family: &#39;Courier New&#39;,monospace">
+                              3rd Place
+                            </div>
+                            <div esd-text="true" class="esd-text" style="color: #b46428; font-family: Georgia,serif; font-weight: 700; font-size: 24px">
+                              ₹5,000
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+                <!-- Sponsor goods line -->
+                <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation">
+                  <tr>
+                    <td esd-text="true" class="esd-text" style="border: 1px solid #1e1e30; border-radius: 4px; padding: 12px 20px; background: rgba(255,255,255,0.03)">
+                      <span style="font-size: 12px; color: #777; letter-spacing: 1px; font-family: Arial,sans-serif">
+                        <strong style="color: #ccc">
+                          35K+ Cash Prize
+                        </strong>
+                        &nbsp;+&nbsp; Merchandise & Vouchers from
+                        <strong style="color: #ccc">
+                          CompTIA
+                        </strong>
+                        and
+                        <strong style="color: #ccc">
+                          Quick Heal Academy
+                        </strong>
+                      </span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- ══ WHAT IS CYBERWAR ══ -->
+            <tr>
+              <td class="mobile-pad" style="border-bottom: 1px solid #1e1e30; background: #0d0d18; padding: 36px 28px">
+                <div esd-text="true" class="esd-text" style="font-family: &#39;Courier New&#39;,monospace; font-size: 9px; letter-spacing: 3px; color: #c83228; text-transform: uppercase; margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid #1e1e30">
+                  // What is CYBERWAR
+                </div>
+                <p style="font-family: Arial,sans-serif; font-size: 14px; color: #bbb; line-height: 1.8; margin: 0 0 14px 0">
+                  CYBERWAR 2026: Capture The Flag is a 24-hour inter university national-level offline cybersecurity competition at Lovely Professional University, built for students who want to move beyond coursework and put their skills to the test in a structured, timed environment. Teams of two compete against peers from universities across India in a single continuous session, working through a curated problem set that spans the full breadth of modern cybersecurity.
+                </p>
+                <p style="font-family: Arial,sans-serif; font-size: 14px; color: #bbb; line-height: 1.8; margin: 0 0 14px 0">
+                  The competition follows the <strong style="color: #e8e8e8">Jeopardy-style</strong> format, the most widely adopted structure in academic CTFs globally. Participants are presented with a board of challenges organised by category and difficulty. Each solved challenge yields a secret string, known as a <strong style="color: #e8e8e8">flag</strong>, which is submitted to the scoring platform to earn points. Harder challenges carry higher point values, allowing teams to plot their own strategy between speed and depth.
+                </p>
+                <p style="font-family: Arial,sans-serif; font-size: 14px; color: #bbb; line-height: 1.8; margin: 0">
+                  All activity runs through a <strong style="color: #e8e8e8">live leaderboard</strong>, visible to every team throughout the 24 hours. When the last minute closes, the leaderboard decides the winners.
+                </p>
+              </td>
+            </tr>
+            <!-- ══ EVENT DETAILS ══ -->
+            <tr>
+              <td class="mobile-pad" style="padding: 36px 28px; border-bottom: 1px solid #1e1e30">
+                <div esd-text="true" class="esd-text" style="font-family: &#39;Courier New&#39;,monospace; font-size: 9px; letter-spacing: 3px; color: #c83228; text-transform: uppercase; margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid #1e1e30">
+                  // Event Details
+                </div>
+                <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td width="50%" class="detail-cell" style="padding: 5px 5px 5px 0">
+                      <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="border: 1px solid #1a1a2a; border-left: 3px solid #c83228; border-radius: 0 4px 4px 0; background: rgba(255,255,255,0.03)">
+                        <tr>
+                          <td style="padding: 13px 16px">
+                            <div esd-text="true" class="esd-text" style="font-size: 8px; letter-spacing: 2px; color: #555; text-transform: uppercase; margin-bottom: 5px; font-family: &#39;Courier New&#39;,monospace">
+                              Date
+                            </div>
+                            <div esd-text="true" class="esd-text" style="letter-spacing: 1px; font-family: Georgia,serif; font-weight: bold; font-size: 15px; color: #e8e8e8">
+                              27–28 April 2026
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                    <td width="50%" class="detail-cell" style="padding: 5px 0 5px 5px">
+                      <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%" style="border-left: 3px solid #c83228; border-radius: 0 4px 4px 0; background: rgba(255,255,255,0.03); border: 1px solid #1a1a2">
+                        <tr>
+                          <td style="padding: 13px 16px">
+                            <div esd-text="true" class="esd-text" style="font-size: 8px; letter-spacing: 2px; color: #555; text-transform: uppercase; margin-bottom: 5px; font-family: &#39;Courier New&#39;,monospace">
+                              Time
+                            </div>
+                            <div esd-text="true" class="esd-text" style="font-family: Georgia,serif; font-weight: bold; font-size: 15px; color: #e8e8e8; letter-spacing: 1px">
+                              11:00 AM Onwards
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td width="50%" class="detail-cell" style="padding: 5px 5px 5px 0">
+                      <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%" style="border: 1px solid #1a1a2a; border-left: 3px solid #c83228; border-radius: 0 4px 4px 0; background: rgba(255,255,255,0.03)">
+                        <tr>
+                          <td style="padding: 13px 16px">
+                            <div esd-text="true" class="esd-text" style="margin-bottom: 5px; font-family: &#39;Courier New&#39;,monospace; font-size: 8px; letter-spacing: 2px; color: #555; text-transform: uppercase">
+                              Venue
+                            </div>
+                            <div esd-text="true" class="esd-text" style="letter-spacing: 1px; font-family: Georgia,serif; font-weight: bold; font-size: 15px; color: #e8e8e8">
+                              Lovely Professional University
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                    <td width="50%" class="detail-cell" style="padding: 5px 0 5px 5px">
+                      <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%" style="background: rgba(255,255,255,0.03); border: 1px solid #1a1a2a; border-left: 3px solid #c83228; border-radius: 0 4px 4px 0">
+                        <tr>
+                          <td style="padding: 13px 16px">
+                            <div esd-text="true" class="esd-text" style="font-family: &#39;Courier New&#39;,monospace; font-size: 8px; letter-spacing: 2px; color: #555; text-transform: uppercase; margin-bottom: 5px">
+                              Team Size
+                            </div>
+                            <div esd-text="true" class="esd-text" style="letter-spacing: 1px; font-family: Georgia,serif; font-weight: bold; font-size: 15px; color: #e8e8e8">
+                              2 Members
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td width="50%" class="detail-cell" style="padding: 5px 5px 5px 0">
+                      <table cellpadding="0" cellspacing="0" role="presentation" width="100%" border="0" style="border: 1px solid #1a1a2a; border-left: 3px solid #c83228; border-radius: 0 4px 4px 0; background: rgba(255,255,255,0.03)">
+                        <tr>
+                          <td style="padding: 13px 16px">
+                            <div esd-text="true" class="esd-text" style="font-family: &#39;Courier New&#39;,monospace; font-size: 8px; letter-spacing: 2px; color: #555; text-transform: uppercase; margin-bottom: 5px">
+                              Format
+                            </div>
+                            <div esd-text="true" class="esd-text" style="color: #e8e8e8; letter-spacing: 1px; font-family: Georgia,serif; font-weight: bold; font-size: 15px">
+                              Jeopardy-Style
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                    <td width="50%" class="detail-cell" style="padding: 5px 0 5px 5px">
+                      <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%" style="background: rgba(255,255,255,0.03); border: 1px solid #1a1a2a; border-left: 3px solid #c83228; border-radius: 0 4px 4px 0">
+                        <tr>
+                          <td style="padding: 13px 16px">
+                            <div esd-text="true" class="esd-text" style="font-size: 8px; letter-spacing: 2px; color: #555; text-transform: uppercase; margin-bottom: 5px; font-family: &#39;Courier New&#39;,monospace">
+                              Duration
+                            </div>
+                            <div esd-text="true" class="esd-text" style="letter-spacing: 1px; font-family: Georgia,serif; font-weight: bold; font-size: 15px; color: #e8e8e8">
+                              24 Hours
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- ══ CHALLENGE CATEGORIES ══ -->
+            <tr>
+              <td class="mobile-pad" style="border-bottom: 1px solid #1e1e30; background: #0d0d18; padding: 36px 28px">
+                <div esd-text="true" class="esd-text" style="font-family: &#39;Courier New&#39;,monospace; font-size: 9px; letter-spacing: 3px; color: #c83228; text-transform: uppercase; margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid #1e1e30">
+                  // Challenge Categories
+                </div>
+                <p style="font-family: Arial,sans-serif; font-size: 13px; color: #888; line-height: 1.7; margin: 0 0 18px 0">
+                  CYBERWAR spans nine established domains of modern cybersecurity. Every team will encounter a mix of categories across the board — breadth wins.
+                </p>
+                <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
+                  <tr>
+                    <td style="padding: 5px 0">
+                      <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="border: 1px solid #1a1a2a; border-left: 3px solid #c83228; border-radius: 0 4px 4px 0; background: rgba(255,255,255,0.03)">
+                        <tr>
+                          <td style="padding: 12px 16px">
+                            <div style="font-family: Georgia,serif; font-weight: bold; font-size: 14px; color: #e8e8e8; margin-bottom: 4px; letter-spacing: 0.5px">
+                              Binary Analysis
+                            </div>
+                            <div style="font-family: Arial,sans-serif; font-size: 12px; color: #999; line-height: 1.6">
+                              Inspect compiled programs and work through low-level binaries to understand their behaviour and recover hidden data.
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 5px 0">
+                      <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="border: 1px solid #1a1a2a; border-left: 3px solid #c83228; border-radius: 0 4px 4px 0; background: rgba(255,255,255,0.03)">
+                        <tr>
+                          <td style="padding: 12px 16px">
+                            <div style="font-family: Georgia,serif; font-weight: bold; font-size: 14px; color: #e8e8e8; margin-bottom: 4px; letter-spacing: 0.5px">
+                              Web Security
+                            </div>
+                            <div style="font-family: Arial,sans-serif; font-size: 12px; color: #999; line-height: 1.6">
+                              Audit web applications and APIs using standard industry techniques taught across OWASP and CompTIA frameworks.
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 5px 0">
+                      <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="border: 1px solid #1a1a2a; border-left: 3px solid #c83228; border-radius: 0 4px 4px 0; background: rgba(255,255,255,0.03)">
+                        <tr>
+                          <td style="padding: 12px 16px">
+                            <div style="font-family: Georgia,serif; font-weight: bold; font-size: 14px; color: #e8e8e8; margin-bottom: 4px; letter-spacing: 0.5px">
+                              Cryptography
+                            </div>
+                            <div style="font-family: Arial,sans-serif; font-size: 12px; color: #999; line-height: 1.6">
+                              Work through classical ciphers, modern encryption schemes, and number-theory puzzles to recover hidden messages.
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 5px 0">
+                      <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="border: 1px solid #1a1a2a; border-left: 3px solid #c83228; border-radius: 0 4px 4px 0; background: rgba(255,255,255,0.03)">
+                        <tr>
+                          <td style="padding: 12px 16px">
+                            <div style="font-family: Georgia,serif; font-weight: bold; font-size: 14px; color: #e8e8e8; margin-bottom: 4px; letter-spacing: 0.5px">
+                              Reverse Engineering
+                            </div>
+                            <div style="font-family: Arial,sans-serif; font-size: 12px; color: #999; line-height: 1.6">
+                              Decompile and analyse software to trace its logic back to source-level intent using tools like Ghidra and IDA.
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 5px 0">
+                      <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="border: 1px solid #1a1a2a; border-left: 3px solid #c83228; border-radius: 0 4px 4px 0; background: rgba(255,255,255,0.03)">
+                        <tr>
+                          <td style="padding: 12px 16px">
+                            <div style="font-family: Georgia,serif; font-weight: bold; font-size: 14px; color: #e8e8e8; margin-bottom: 4px; letter-spacing: 0.5px">
+                              Blockchain Security
+                            </div>
+                            <div style="font-family: Arial,sans-serif; font-size: 12px; color: #999; line-height: 1.6">
+                              Audit smart contracts and on-chain logic for design flaws and unintended behaviours in decentralised systems.
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 5px 0">
+                      <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="border: 1px solid #1a1a2a; border-left: 3px solid #c83228; border-radius: 0 4px 4px 0; background: rgba(255,255,255,0.03)">
+                        <tr>
+                          <td style="padding: 12px 16px">
+                            <div style="font-family: Georgia,serif; font-weight: bold; font-size: 14px; color: #e8e8e8; margin-bottom: 4px; letter-spacing: 0.5px">
+                              Digital Forensics
+                            </div>
+                            <div style="font-family: Arial,sans-serif; font-size: 12px; color: #999; line-height: 1.6">
+                              Recover evidence from disk images, memory dumps, and network captures using established forensic tools and methods.
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 5px 0">
+                      <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="border: 1px solid #1a1a2a; border-left: 3px solid #c83228; border-radius: 0 4px 4px 0; background: rgba(255,255,255,0.03)">
+                        <tr>
+                          <td style="padding: 12px 16px">
+                            <div style="font-family: Georgia,serif; font-weight: bold; font-size: 14px; color: #e8e8e8; margin-bottom: 4px; letter-spacing: 0.5px">
+                              Cloud Security
+                            </div>
+                            <div style="font-family: Arial,sans-serif; font-size: 12px; color: #999; line-height: 1.6">
+                              Review misconfigurations, IAM policies, and access control issues across modern cloud-native infrastructure.
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 5px 0">
+                      <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="border: 1px solid #1a1a2a; border-left: 3px solid #c83228; border-radius: 0 4px 4px 0; background: rgba(255,255,255,0.03)">
+                        <tr>
+                          <td style="padding: 12px 16px">
+                            <div style="font-family: Georgia,serif; font-weight: bold; font-size: 14px; color: #e8e8e8; margin-bottom: 4px; letter-spacing: 0.5px">
+                              Malware Analysis
+                            </div>
+                            <div style="font-family: Arial,sans-serif; font-size: 12px; color: #999; line-height: 1.6">
+                              Study suspicious code samples inside a sandboxed environment to understand their mechanics, structure, and intent.
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 5px 0">
+                      <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="border: 1px solid #1a1a2a; border-left: 3px solid #c83228; border-radius: 0 4px 4px 0; background: rgba(255,255,255,0.03)">
+                        <tr>
+                          <td style="padding: 12px 16px">
+                            <div style="font-family: Georgia,serif; font-weight: bold; font-size: 14px; color: #e8e8e8; margin-bottom: 4px; letter-spacing: 0.5px">
+                              System Hardening
+                            </div>
+                            <div style="font-family: Arial,sans-serif; font-size: 12px; color: #999; line-height: 1.6">
+                              Solve privilege and access control puzzles that reward a strong grasp of Linux, Windows, and system-level fundamentals.
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- ══ ORGANISED & POWERED BY ══ -->
+            <tr>
+              <td class="mobile-pad" style="border-bottom: 1px solid #1e1e30; padding: 36px 28px">
+                <div esd-text="true" class="esd-text" style="font-family: &#39;Courier New&#39;,monospace; font-size: 9px; letter-spacing: 3px; color: #c83228; text-transform: uppercase; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #1e1e30">
+                  // Organised & Powered By
+                </div>
+                <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
+                  <tr>
+                    <td width="25%" class="sponsor-cell" style="text-align: center; vertical-align: top; padding: 8px">
+                      <div esd-text="true" class="esd-text" style="font-family: &#39;Courier New&#39;,monospace; font-size: 8px; letter-spacing: 2px; color: #555; text-transform: uppercase; margin-bottom: 10px">
+                        Organiser
+                      </div>
+                      <img height="auto" src="https://raw.githubusercontent.com/Pritamongithub/event-assets/refs/heads/main/social-logo-lpu-big%201.png" width="80" alt="LPU" style="margin: 0 auto; height: 32px; width: auto; display: block">
+                    </td>
+                    <td width="25%" class="sponsor-cell" style="vertical-align: top; padding: 8px; text-align: center">
+                      <div esd-text="true" class="esd-text" style="color: #555; text-transform: uppercase; margin-bottom: 10px; font-family: &#39;Courier New&#39;,monospace; font-size: 8px; letter-spacing: 2px">
+                        Title Sponsor
+                      </div>
+                      <img height="auto" src="https://raw.githubusercontent.com/Pritamongithub/event-assets/refs/heads/main/quickhealacaddemy%201.png" width="100" alt="Quick Heal Academy" style="display: block; margin: 0 auto; height: 32px; width: auto; border-radius: 3px">
+                    </td>
+                    <td width="25%" class="sponsor-cell" style="padding: 8px; text-align: center; vertical-align: top">
+                      <div esd-text="true" class="esd-text" style="font-size: 8px; letter-spacing: 1px; color: #555; text-transform: uppercase; margin-bottom: 10px; font-family: &#39;Courier New&#39;,monospace">
+                        Certification Partner
+                      </div>
+                      <img alt="CompTIA" height="auto" src="https://raw.githubusercontent.com/Pritamongithub/event-assets/refs/heads/main/Vector.png" width="100" style="margin: 0 auto; height: 32px; width: auto; display: block">
+                    </td>
+                    <td width="25%" class="sponsor-cell" style="padding: 8px; text-align: center; vertical-align: top">
+                      <div esd-text="true" class="esd-text" style="margin-bottom: 10px; font-family: &#39;Courier New&#39;,monospace; font-size: 8px; letter-spacing: 2px; color: #555; text-transform: uppercase">
+                        Event Partner
+                      </div>
+                      <img height="auto" src="https://raw.githubusercontent.com/Pritamongithub/event-assets/refs/heads/main/Astitwam%201.png" width="100" alt="Astitwam" style="width: auto; display: block; margin: 0 auto; height: 32px">
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- ══ WHY PARTICIPATE ══ -->
+            <tr>
+              <td class="mobile-pad" style="border-bottom: 1px solid #1e1e30; background: #0d0d18; padding: 36px 28px">
+                <div esd-text="true" class="esd-text" style="font-family: &#39;Courier New&#39;,monospace; font-size: 9px; letter-spacing: 3px; color: #c83228; text-transform: uppercase; margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid #1e1e30">
+                  // Why Participate
+                </div>
+                <p style="font-family: Arial,sans-serif; font-size: 14px; color: #bbb; line-height: 1.8; margin: 0 0 14px 0">
+                  CYBERWAR 2026 is more than a leaderboard, it is a credential-building opportunity recognised by the industry. Participants gain direct exposure to two of the most respected names in cybersecurity education: <strong style="color: #e8e8e8">CompTIA</strong>, the world's leading vendor-neutral IT certification body, and <strong style="color: #e8e8e8">Quick Heal Academy</strong>, the training division of one of India's most trusted cybersecurity companies.
+                </p>
+                <p style="font-family: Arial,sans-serif; font-size: 14px; color: #bbb; line-height: 1.8; margin: 0 0 14px 0">
+                  Top-ranking teams earn <strong style="color: #e8e8e8">CompTIA certification vouchers</strong> redeemable against globally recognised credentials, along with Quick Heal Academy merchandise and learning resources. Every participant walks away with something arguably more valuable than the prizes themselves, a verifiable record of hands-on technical competence, and the experience of solving structured problems in a team, against the clock.
+                </p>
+                <p style="font-family: Arial,sans-serif; font-size: 14px; color: #bbb; line-height: 1.8; margin: 0">
+                  For students aiming at careers in security analysis, security research, incident response, or cloud engineering, participation in a national-level CTF is among the strongest signals a recruiter will see on a resume. For those still exploring the field, twenty-four hours at CYBERWAR 2026 : Capture The Flag offers a realistic, first-hand encounter with the kind of work the cybersecurity industry does day to day.
+                </p>
+              </td>
+            </tr>
+            <!-- ══ CTA ══ -->
+            <tr>
+              <td style="background: linear-gradient(135deg,#0f0808 0%,#0a0a0f 100%); padding: 44px 28px; text-align: center; border-bottom: 1px solid #1e1e30">
+                <div esd-text="true" class="esd-text" style="color: #fff; text-transform: uppercase; margin-bottom: 8px; font-family: Georgia,&#39;Times New Roman&#39;,serif; font-weight: 700; font-size: 26px; letter-spacing: 3px">
+                  Registrations Are Open
+                </div>
+                <div esd-text="true" class="esd-text" style="margin-bottom: 28px; letter-spacing: 1px; font-family: Arial,sans-serif; font-size: 13px; color: #666">
+                  Seats are limited. Reserve your spot today.
+                </div>
+                <table cellpadding="0" cellspacing="0" role="presentation" align="center" border="0" style="margin: 0 auto 18px">
+                  <tr>
+                    <td style="border-radius: 2px; background: #c83228">
+                      <a href="https://quickhealctf.com/" style="display: inline-block; color: #ffffff; font-family: Georgia,serif; background: #c83228; letter-spacing: 4px; padding: 14px 44px; border-radius: 2px; font-weight: bold; font-size: 15px; text-decoration: none; text-transform: uppercase">
+                        Register Now
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+                <div esd-text="true" class="esd-text" style="font-family: &#39;Courier New&#39;,monospace; font-size: 9px; color: #444; letter-spacing: 2px; text-transform: uppercase">
+                  // 2 members per team · inter university national level · 24 hours
+                </div>
+              </td>
+            </tr>
+            <!-- ══ STAY CONNECTED ══ -->
+            <tr>
+              <td esd-text="true" class="mobile-pad esd-text" style="padding: 36px 28px; border-bottom: 1px solid #1e1e30; text-align: center">
+                <div esd-text="true" class="esd-text" style="letter-spacing: 3px; color: #c83228; text-transform: uppercase; margin-bottom: 14px; font-family: &#39;Courier New&#39;,monospace; font-size: 9px">
+                  // Stay Connected
+                </div>
+                <p style="max-width: 460px; font-family: Arial,sans-serif; font-size: 13px; color: #777; line-height: 1.75; margin: 0 auto 24px">
+                  All announcements, updates, and further reveals for CYBERWAR and every future event from Astitwam will be shared exclusively across our official channels.
+                  <strong style="color: #bbb">
+                    Follow and join all handles
+                  </strong>
+                  to stay on top of every update. There is more yet to be revealed.
+                </p>
+                <!-- Social buttons as table cells -->
+                <table cellspacing="0" role="presentation" align="center" border="0" cellpadding="0" style="margin: 0 auto 20px">
+                  <tr>
+                    <td style="padding: 4px">
+                      <a href="https://whatsapp.com/channel/0029VbCNqGM8kyyUvHd8Gb0P" style="background: rgba(37,211,102,0.06); padding: 9px 16px; color: #25d366; letter-spacing: 1.5px; border-radius: 2px; display: inline-block; font-family: &#39;Courier New&#39;,monospace; font-size: 9px; text-decoration: none; text-transform: uppercase; border: 1px solid rgba(37,211,102,0.3)">
+                        📢&nbsp; WhatsApp Channel
+                      </a>
+                    </td>
+                    <td style="padding: 4px">
+                      <a href="https://www.instagram.com/astitwam.events" style="letter-spacing: 1.5px; text-transform: uppercase; display: inline-block; border: 1px solid rgba(228,64,95,0.3); color: #e4405f; padding: 9px 16px; text-decoration: none; background: rgba(228,64,95,0.06); font-family: &#39;Courier New&#39;,monospace; font-size: 9px; border-radius: 2px">
+                        📷&nbsp; Instagram
+                      </a>
+                    </td>
+                    <td style="padding: 4px">
+                      <a href="https://www.linkedin.com/company/astitwam-in/" style="padding: 9px 16px; border: 1px solid rgba(10,102,194,0.35); border-radius: 2px; text-transform: uppercase; font-size: 9px; letter-spacing: 1.5px; display: inline-block; color: #0a66c2; font-family: &#39;Courier New&#39;,monospace; text-decoration: none; background: rgba(10,102,194,0.08)">
+                        💼&nbsp; LinkedIn
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+                <div esd-text="true" class="esd-text" style="font-size: 9px; color: #3a3a4a; letter-spacing: 2px; text-transform: uppercase; font-family: &#39;Courier New&#39;,monospace">
+                  More updates dropping soon — stay tuned.
+                </div>
+              </td>
+            </tr>
+            <!-- ══ FOOTER ══ -->
+            <tr>
+              <td esd-text="true" class="esd-text" style="background: #080810; padding: 28px 28px; text-align: center; border-top: 1px solid #1e1e30">
+                <p style="font-family: Arial,sans-serif; font-size: 11px; color: #444; letter-spacing: 1.2px; line-height: 1.9; margin: 0 0 14px 0">
+                  Organised by
+                  <strong style="color: #666">
+                    School of AI & Emerging Technologies
+                  </strong>
+                  <br>
+                  Lovely Professional University, Punjab, India
+                  <br>
+                  Powered by
+                  <strong style="color: #666">
+                    Quick Heal
+                  </strong>
+                  &
+                  <strong style="color: #666">
+                    CompTIA
+                  </strong>
+                  <br>
+                  Operated by
+                  <strong style="color: #666">
+                    Astitwam
+                  </strong>
+                  
+
+                </p> 
+                
+                <table role="presentation" align="center" border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto 14px">
+                  <tr>
+                    <td style="height: 1px; background: #1a1a2a; width: 200px"></td>
+                  </tr>
+                </table>
+                <div esd-text="true" class="esd-text" style="font-size: 9px; color: #2a2a3a; letter-spacing: 2px; text-transform: uppercase; font-family: &#39;Courier New&#39;,monospace">
+               © 2026 Astitwam &nbsp;·&nbsp; <br><br>
+                Want to step away? <br> <a href="mailto:astitwamofficials@gmail.com?subject=Unsubscribe">Click here to unsubscribe</a>
+                 
+                  
+                </div>
+              </td>
+            </tr>
+          </table>
+          <!-- END EMAIL CONTAINER -->
+        </td>
+      </tr>
+    </table>
+    <!-- END OUTER WRAPPER -->
+
+  <body style="background: #0a0a0f; margin: 0; padding: 0">
+    <!-- OUTER WRAPPER -->
+    <table cellpadding="0" cellspacing="0" role="presentation" width="100%" border="0" dir="ltr" style="background: #0a0a0f">
+      <tr>
+<!-- 🔥 SIGNATURE WITH LOGO -->
+<tr>
+  <td style="background:#ffffff; padding:25px 40px;">
+    
+    <table cellpadding="0" cellspacing="0" role="presentation">
+      <tr>
+
+        <!-- LEFT RED BORDER -->
+        <td style="width:4px; background:#c83228;"></td>
+
+        <!-- CONTENT -->
+        <td style="padding-left:16px;">
+
+          <!-- TOP ROW: LOGO + NAME -->
+          <table cellpadding="0" cellspacing="0" role="presentation">
+            <tr>
+              
+              <!-- LOGO -->
+              <td style="vertical-align:middle; padding-right:12px;">
+                <img src="cid:logo" width="60" style="border-radius:6px;">
+              </td>
+
+              <!-- NAME -->
+              <td style="vertical-align:middle;">
+                <div style="font-family: Arial; font-size:18px; font-weight:bold; color:#c83228;">
+                  MADHURESH KUMAR JHA
+                </div>
+                <div style="font-family: Arial; font-size:13px; color:#444;">
+                  CEO & FOUNDER
+                </div>
+                <div style="font-family: Arial; font-size:14px; color:#c83228;">
+                  UNI6CTF
+                </div>
+              </td>
+
+            </tr>
+          </table>
+
+          <!-- DIVIDER -->
+          <div style="height:1px; background:#ccc; margin:10px 0; width:280px;"></div>
+
+          <!-- CONTACT -->
+          <div style="font-family: Arial; font-size:12px; color:#555;">
+            📧 madhuresh453@gmail.com &nbsp; | &nbsp;
+            🌐 <a href="https://uni6ctf.online" style="color:#c83228; text-decoration:none;">uni6ctf.online</a> &nbsp; | &nbsp;
+            🔗 <a href="https://www.linkedin.com/in/madhuresh453" style="color:#c83228; text-decoration:none;">LinkedIn</a>
+          </div>
+
+          <!-- TAGLINE -->
+          <div style="font-family: Arial; font-size:12px; color:#777; margin-top:8px;">
+            Building India's <span style="color:#c83228; font-weight:bold;">Cybersecurity</span> Future.
+          </div>
+
+        </td>
+      </tr>
+    </table>
+
+  </td>
+</tr>
+      </tr>
+    </table>
+    <!-- END OUTER WRAPPER -->
+  </body>
+</html>
+"""
+
+                # ✅ TEXT + HTML (IMPORTANT FIX)
+                msg.set_content("CYBER WAR @LPU")
+                msg.add_alternative(html_content, subtype='html')
+                with open("UNI6CTF_logo.png", "rb") as f:
+                    msg.get_payload()[1].add_related(
+                        f.read(),
+                        maintype="image",
+                        subtype="png",
+                        cid="logo"
+                    )
+                # ===============================
+                # 📎 ATTACH CERTIFICATE
+                # ===============================
+               
+                # ===============================
+                # 🚀 SEND EMAIL
+                # ===============================
+                server.send_message(msg)
+                df.loc[i, 'Email Sent'] = True
+
+                print(f"✅ Sent: {email}")
+
+                time.sleep(1)  # prevent SMTP timeout
+
+            except Exception as e:
+                print(f"❌ Failed: {email} → {e}")
+    df.to_csv(csv_path, index=False)
+    print("\n✅ All Emails Sent Successfully!")
+
+except Exception as e:
+    print("❌ SMTP Error:", e)
+    
+    
+    
+

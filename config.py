@@ -1,5 +1,5 @@
-EMAIL = "organizers@uni6ctf.online"
-PASSWORD = "1D5iRAm8$"
+EMAIL = "hello@astitwam.in"
+PASSWORD = "@stitw@m26Host"
 
 SMTP_SERVER = "smtp.hostinger.com"
 SMTP_PORT = 587

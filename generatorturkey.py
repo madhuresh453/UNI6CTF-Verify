@@ -1,0 +1,219 @@
+from PIL import Image, ImageDraw, ImageFont
+import pandas as pd
+import os
+import qrcode
+from PIL import ImageFont
+from utils10 import generate_cert_id
+from config import BASE_URL
+import hashlib
+
+# ===============================
+# 📂 LOAD DATA
+# ===============================
+df = pd.read_csv("data/participants10.csv")
+df.columns = df.columns.str.strip()
+
+# Remove duplicate usernames (safety)
+df = df.drop_duplicates(subset=["Username"])
+
+template_path = "templates/certificate10.png"
+font_path = "fonts/arial.ttf"
+cursive_font = "fonts/GreatVibes-Regular.ttf"
+
+os.makedirs("output/certificates10", exist_ok=True)
+
+# ===============================
+# 📂 LOAD OLD DATA (FOR RESUME + SKIP)
+# ===============================
+start_index = 1
+done_usernames = set()
+
+if os.path.exists("output/final_data10.csv") and os.path.getsize("output/final_data10.csv") > 0:
+    old_df = pd.read_csv("output/final_data10.csv")
+    old_df.columns = old_df.columns.str.strip()
+
+    # ✅ Get already generated usernames
+    if 'Username' in old_df.columns:
+        done_usernames = set(old_df['Username'])
+
+    # ✅ Get last certificate ID
+    if 'Certificate ID' in old_df.columns:
+        last_ids = old_df['Certificate ID'].dropna()
+
+        if len(last_ids) > 0:
+            last_num = max([
+                int(str(x).split("-")[-1]) for x in last_ids
+            ])
+            start_index = last_num + 1
+
+# ===============================
+# 🔢 CERTIFICATE COUNTER
+# ===============================
+current_index = start_index
+
+# ===============================
+# 🔁 LOOP THROUGH USERS
+# ===============================
+new_rows = []
+
+for i, row in df.iterrows():
+
+    username = str(row['Username'])
+
+    # ❌ Skip already generated users
+    if username in done_usernames:
+        print(f"⏩ Skipping {username} (already generated)")
+        continue
+
+    # ===============================
+    # 🎨 CREATE CERTIFICATE
+    # ===============================
+    img = Image.open(template_path).convert("RGB")
+    draw = ImageDraw.Draw(img)
+
+    # ✅ UNIQUE CERT ID (FIXED)
+    cert_id = generate_cert_id(current_index)
+    current_index += 1
+
+    verify_link = BASE_URL + cert_id
+    hash_value = hashlib.sha256(cert_id.encode()).hexdigest()
+    
+    team = str(row['Team Name'])
+    rank = str(row['Rank'])
+    points = str(row['Points'])
+    full_name = str(row['Full Name'])
+
+    white = (255, 255, 255)
+
+    # ===============================
+    # 👤 FULL NAME (AUTO FIT)
+    # ===============================
+    
+    font_size = 150
+    min_font_size = 30
+    yellow = (255, 215, 0)  # gold color
+    while font_size >= min_font_size:
+        font_name = ImageFont.truetype(cursive_font, font_size)
+        bbox = draw.textbbox((0, 0), full_name, font=font_name)
+        text_width = bbox[2] - bbox[0]
+
+        if text_width <= img.width - 200:
+            break
+        font_size -= 2
+
+    draw.text((1880, 1278), full_name, font=font_name, fill=yellow, anchor="mm")
+
+    # ===============================
+    # 🟡 CERTIFICATE ID (TOP CENTER)
+    # ===============================
+    font_id = ImageFont.truetype(font_path, 45)
+    text = cert_id
+    spacing = 5
+    yellow = (255, 215, 0)  # gold color
+    total_width = 0
+    for char in text:
+        total_width += draw.textbbox((0, 0), char, font=font_id)[2] + spacing
+    total_width -= spacing
+
+    x = (img.width - total_width) / 2
+    y = 10
+
+    current_x = x
+    for char in text:
+        draw.text((current_x, y), char, font=font_id, fill=yellow)
+        char_width = draw.textbbox((0, 0), char, font=font_id)[2]
+        current_x += char_width + spacing
+
+    # ===============================
+    # 👤 USERNAME
+    # ===============================
+    font_small = ImageFont.truetype(font_path, 32)
+    font_main = ImageFont.truetype(font_path, 22)
+
+    label_x = 195
+    label_y = 328
+
+    label_text = "Username:"
+    label_width = draw.textbbox((0, 0), label_text, font=font_small)[2]
+
+    username_x = label_x + label_width + 15
+    draw.text((username_x, label_y), username, font=font_main, fill=white)
+
+    # ===============================
+    # 👥 TEAM
+    # ===============================
+    font_size = 90
+    min_font_size = 30
+    yellow = (255, 215, 0)  # gold color
+    while font_size >= min_font_size:
+        font_name = ImageFont.truetype(cursive_font, font_size)
+        bbox = draw.textbbox((0, 0), team, font=font_name)
+        text_width = bbox[2] - bbox[0]
+
+        if text_width <= img.width - 200:
+            break
+        font_size -= 2
+
+    draw.text((1880, 1650), team, font=font_name, fill=yellow, anchor="mm")
+
+    # ===============================
+    # 🏆 RANK & 🔥 POINTS
+    # ===============================
+    
+    
+
+    # ===============================
+    # 🔗 QR CODE
+    # ===============================
+    qr = qrcode.make(verify_link).resize((350, 350))
+    img.paste(qr, (2900, 1900))
+
+    # ===============================
+    # 💾 SAVE FILE (INSIDE LOOP ✅)
+    # ===============================
+    filename = f"output/certificates10/{username}.png"
+    img.save(filename)
+
+    # ===============================
+    # 📝 STORE NEW ROW (ONLY NEW USERS)
+    # ===============================
+    new_rows.append({
+        'Full Name': full_name,
+        'Username': username,
+        'Team Name': team,
+        'Rank': rank,
+        'Points': points,
+        'Email': row['Email'],
+        'Certificate ID': cert_id,
+        'File': filename
+    })
+
+    print(f"✅ Generated: {username}")
+
+# ===============================
+# 💾 SAVE CSV (ONLY NEW DATA)
+# ===============================
+output_file = "output/final_data10.csv"
+
+columns = ['Full Name', 'Username', 'Team Name', 'Rank', 'Points', 'Email', 'Certificate ID', 'File']
+
+if new_rows:
+    new_df = pd.DataFrame(new_rows)
+    new_df = new_df[columns]
+
+    if os.path.exists(output_file) and os.path.getsize(output_file) > 0:
+        old_df = pd.read_csv(output_file)
+        old_df.columns = old_df.columns.str.strip()
+
+        final_df = pd.concat([old_df, new_df], ignore_index=True)
+
+        # ✅ REMOVE DUPLICATES SAFELY
+        final_df = final_df.drop_duplicates(subset=['Username'], keep='last')
+
+        final_df.to_csv(output_file, index=False)
+    else:
+        new_df.to_csv(output_file, index=False)
+
+    print("🎉 New Certificates Added Successfully!")
+else:
+    print("⚠️ No new users to process")

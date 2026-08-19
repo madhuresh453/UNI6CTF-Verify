@@ -74,7 +74,7 @@ try:
 
             try:
                 msg = EmailMessage()
-                msg['Subject'] = "🎉🎉 UNI6CTF 1.0 Certificate 🎉🎉"
+                msg['Subject'] = "Your Trivarna 2.0 CTF Certificate Has Arrived 🇮🇳"
                 msg['From'] = EMAIL
                 msg['To'] = email
 
@@ -85,19 +85,20 @@ try:
                 # ===============================
                 # 📩 HTML EMAIL
                 # ===============================
+                
                 html_content = f"""<!DOCTYPE html>
-<!DOCTYPE html>
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
 <meta name="supported-color-schemes" content="light dark">
+
 <style>
     body {{
         margin:0;
         padding:0;
         background:#0f172a;
-        font-family: Arial, sans-serif;
+        font-family:Arial, sans-serif;
         color:#f3f4f6;
     }}
 
@@ -114,17 +115,17 @@ try:
     .header {{
         text-align:center;
         padding:25px;
-        background:linear-gradient(135deg, #020617, #0f172a);
+        background:linear-gradient(135deg,#020617,#0f172a);
         border-bottom:2px solid #facc15;
     }}
 
     .logo {{
         width:90px;
         margin-bottom:10px;
-        filter: brightness(1.2);
-         border-radius:50%;
-    object-fit:cover;
-    border:2px solid #facc15;
+        filter:brightness(1.2);
+        border-radius:50%;
+        object-fit:cover;
+        border:2px solid #facc15;
     }}
 
     .title {{
@@ -158,7 +159,7 @@ try:
 
     .button {{
         display:inline-block;
-        background:linear-gradient(135deg, #facc15, #eab308);
+        background:linear-gradient(135deg,#facc15,#eab308);
         color:#000000 !important;
         padding:12px 22px;
         border-radius:8px;
@@ -184,13 +185,30 @@ try:
         box-shadow:0 0 12px rgba(0,0,0,0.5);
     }}
 
+    .info-box {{
+        background:#172033;
+        border-left:4px solid #facc15;
+        padding:16px;
+        border-radius:8px;
+        margin:22px 0;
+    }}
+
+    .social-box {{
+        background:linear-gradient(135deg,#1e293b,#172033);
+        padding:18px;
+        border-radius:10px;
+        margin:22px 0;
+        border:1px solid #334155;
+        text-align:center;
+    }}
+
     .footer {{
         text-align:center;
-    padding:18px;
-    font-size:12px;
-    color:#9ca3af !important;
-    border-top:1px solid #1f2937;
-    background:#020617;
+        padding:18px;
+        font-size:12px;
+        color:#9ca3af !important;
+        border-top:1px solid #1f2937;
+        background:#020617;
     }}
 </style>
 
@@ -202,71 +220,224 @@ try:
 
     <!-- HEADER -->
     <div class="header">
+
         <img src="cid:logo" class="logo">
-        <div class="title">🏆 UNI6CTF 1.0 Certificate</div>
+
+        <div class="title">
+            🏆 TRIVARNA 2.0 Certificate
+        </div>
+
     </div>
+
 
     <!-- CONTENT -->
     <div class="content">
 
-        <p>Dear <span class="highlight">{row['Full Name']}</span>,</p>
-
         <p>
-        successfully completed participation in 
-        <span class="highlight">UNI6CTF 1.0 – Capture The Flag Competition</span>.
+            Dear <span class="highlight">{row['Full Name']}</span>,
         </p>
 
-        <!-- DETAILS -->
+
+        <p>
+            <b>Trivarna CTF may have wrapped, but what you were part of doesn't end there.</b>
+        </p>
+
+
+        <p>
+            Your official <span class="highlight">Trivarna 2.0 certificate</span>
+            is attached to this email.
+        </p>
+
+
+        <p>
+            This certificate recognizes your participation in the
+            <span class="highlight">
+                TRIVARNA 2.0 INTERNATIONAL CTF CHAMPIONSHIP
+            </span>,
+            an international <b>24-hour Capture The Flag championship</b>
+            held to mark <span class="highlight">India's 80th Independence Day</span>.
+        </p>
+
+
+        <p>
+            Whatever your final standing, you showed up, you competed,
+            and you were part of a global field of students, researchers,
+            and professionals who spent their Independence Day doing
+            exactly what the moment called for:
+            <b>defending, exploring, and pushing further.</b>
+        </p>
+
+
+        <!-- PARTICIPANT DETAILS -->
         <div class="card">
+
             <b>Username:</b> {row['Username']}<br>
+
             <b>Team:</b> {row['Team Name']}<br>
+
             <b>Rank:</b> {row['Rank']}<br>
+
             <b>Points:</b> {row['Points']}
+
         </div>
 
-        <p>Your certificate has been generated and is attached</p>
 
-        <!-- BUTTON -->
-        <a href="{BASE_URL}{row['Certificate ID']}" class="button">
-            🔍 Verify Certificate
-        </a>
+        <!-- CERTIFICATE INFORMATION -->
+        <div class="info-box">
+
+            <b style="color:#facc15;">
+                📜 Your Certificate
+            </b>
+
+            <br><br>
+
+            Your certificate is official recognition of your
+            participation and can be added to your
+            <b>resume, LinkedIn profile, portfolio, or achievements.</b>
+
+            <br><br>
+
+            It is yours to use and share.
+
+        </div>
+
+
+        <p>
+            Your certificate has been generated and is attached
+            to this email.
+        </p>
+
+
+        <!-- VERIFY BUTTON -->
+        <div style="text-align:center;">
+
+            <a href="{BASE_URL}{row['Certificate ID']}" class="button">
+                🔍 Verify Certificate
+            </a>
+
+        </div>
+
 
         <!-- PREVIEW -->
         <div class="preview">
-            <p style="color:#facc15;">Certificate Preview</p>
+
+            <p style="color:#facc15;">
+                Certificate Preview
+            </p>
+
             <img src="https://verify.uni6ctf.online/certificates/{row['Username']}.png">
+
         </div>
 
-        <p style="margin-top:25px;">
-        UNI6CTF is a student-driven cybersecurity initiative focused on developing real-world hacking skills, organizing CTF competitions, and building a strong cybersecurity community.
-        </p>
+
+        <!-- SPONSOR REWARDS -->
+        <div class="info-box">
+
+            <b style="color:#facc15;">
+                🎁 Sponsor Rewards
+            </b>
+
+            <br><br>
+
+            Sponsor rewards including
+            <b>certifications, platform access, vouchers, and more</b>
+            will be sent separately in a follow-up email.
+
+            <br><br>
+
+            <b>Please keep an eye on your inbox.</b>
+
+        </div>
+
+
+        <!-- SOCIAL SHARING -->
+        <div class="social-box">
+
+            <p style="color:#facc15; font-size:16px; font-weight:bold;">
+                📢 One Small Ask
+            </p>
+
+            <p>
+                If you're proud of this — and you should be —
+                <b>share it!</b>
+            </p>
+
+            <p>
+                Tag <b>Astitwam</b> and <b>Trivarna CTF</b>
+                on LinkedIn or Instagram when you post your certificate.
+            </p>
+
+            <p style="color:#cbd5e1;">
+                Every share helps the next generation of cyber warriors
+                discover this mission the way you did.
+            </p>
+
+        </div>
+
+
+        <!-- EXISTING MESSAGE -->
+    
+
 
         <p>
-        We look forward to your participation in future competitions 🚀
+
+            We look forward to your participation in future
+            competitions 🚀
+
         </p>
+
+
+        <p>
+
+            Thank you for making
+            <span class="highlight">Trivarna CTF</span>
+            what it was.
+
+            <br><br>
+
+            This is only the beginning of what
+            <span class="highlight">Astitwam</span>
+            is building.
+
+        </p>
+
 
         <br>
 
+
+        <!-- SIGNATURE -->
         <p>
-        Best Regards,<br><br>
 
-        <b style="color:#ffffff;">Madhuresh Kumar Jha</b><br>
-        CEO & Founder, UNI6CTF<br><br>
+            Until the next mission,<br><br>
 
-        <b style="color:#ffffff;">Krish Pathania</b><br>
-        Co-Founder, UNI6CTF
+            <b style="color:#ffffff;">
+                TEAM ASTITWAM
+            </b>
+
+            <br><br>
+
+            📧 astitwamofficials@gmail.com<br>
+
+            🌐 astitwam.in
+
         </p>
 
     </div>
 
+
     <!-- FOOTER -->
     <div class="footer">
-        🌐 uni6ctf.online<br>
-        📧 organizers@uni6ctf.online<br><br>
+
+        🌐 https://astitwam.in<br>
+
+        📧 hello@astitwam.in<br><br>
+
         This is an automated email. Please do not reply.
+
     </div>
 
 </div>
+
 
 <!-- TRACKING PIXEL -->
 <img src="{TRACK_URL}{row['Certificate ID']}" width="1" height="1">
@@ -275,10 +446,12 @@ try:
 </html>
 """
 
+
+
                 # ✅ TEXT + HTML (IMPORTANT FIX)
                 msg.set_content("Your certificate is attached.")
                 msg.add_alternative(html_content, subtype='html')
-                with open("UNI6CTF_logo.png", "rb") as f:
+                with open("logo.png", "rb") as f:
                     msg.get_payload()[1].add_related(
                         f.read(),
                         maintype="image",

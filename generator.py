@@ -16,8 +16,9 @@ df.columns = df.columns.str.strip()
 # Remove duplicate usernames (safety)
 df = df.drop_duplicates(subset=["Username"])
 
-template_path = "templates/certificate.png"
-font_path = "fonts/arial.ttf"
+template_path = "templates/CERTIFICATE (1).png"
+font_path = "fonts/ArianaVioleta-dz2K.ttf"
+cert_id_font_path = "fonts/arial.ttf"
 
 os.makedirs("output/certificates", exist_ok=True)
 
@@ -87,7 +88,7 @@ for i, row in df.iterrows():
     # ===============================
     # 👤 FULL NAME (AUTO FIT)
     # ===============================
-    font_size = 50
+    font_size = 140
     min_font_size = 30
 
     while font_size >= min_font_size:
@@ -99,14 +100,14 @@ for i, row in df.iterrows():
             break
         font_size -= 2
 
-    draw.text((img.width // 2, 275), full_name, font=font_name, fill=white, anchor="mm")
+    draw.text((img.width // 2, 700), full_name, font=font_name, fill=white, anchor="mm")
 
     # ===============================
     # 🟡 CERTIFICATE ID (TOP CENTER)
     # ===============================
-    font_id = ImageFont.truetype(font_path, 18)
+    font_id = ImageFont.truetype(cert_id_font_path, 18)
     text = cert_id
-    spacing = 5
+    spacing = 10
 
     total_width = 0
     for char in text:
@@ -114,7 +115,7 @@ for i, row in df.iterrows():
     total_width -= spacing
 
     x = (img.width - total_width) / 2
-    y = 3
+    y = img.height - 50
 
     current_x = x
     for char in text:
@@ -125,34 +126,34 @@ for i, row in df.iterrows():
     # ===============================
     # 👤 USERNAME
     # ===============================
-    font_small = ImageFont.truetype(font_path, 32)
-    font_main = ImageFont.truetype(font_path, 22)
+    # font_small = ImageFont.truetype(font_path, 32)
+    # font_main = ImageFont.truetype(font_path, 22)
 
-    label_x = 195
-    label_y = 328
+    # label_x = 195
+    # label_y = 328
 
-    label_text = "Username:"
-    label_width = draw.textbbox((0, 0), label_text, font=font_small)[2]
+    # label_text = "Username:"
+    # label_width = draw.textbbox((0, 0), label_text, font=font_small)[2]
 
-    username_x = label_x + label_width + 15
-    draw.text((username_x, label_y), username, font=font_main, fill=white)
+    # username_x = label_x + label_width + 15
+    # draw.text((username_x, label_y), username, font=font_main, fill=white)
 
     # ===============================
     # 👥 TEAM
     # ===============================
-    draw.text((635, 328), team, font=font_main, fill=white)
+    # draw.text((635, 328), team, font=font_main, fill=white)
 
     # ===============================
     # 🏆 RANK & 🔥 POINTS
     # ===============================
-    draw.text((428, 461), rank, font=font_main, fill=white)
-    draw.text((700, 461), points, font=font_main, fill=white)
+    # draw.text((428, 461), rank, font=font_main, fill=white)
+    # draw.text((700, 461), points, font=font_main, fill=white)
 
     # ===============================
     # 🔗 QR CODE
     # ===============================
-    qr = qrcode.make(verify_link).resize((140, 140))
-    img.paste(qr, (91, 63))
+    qr = qrcode.make(verify_link).resize((170, 170))
+    img.paste(qr, (1653, 941))
 
     # ===============================
     # 💾 SAVE FILE (INSIDE LOOP ✅)
